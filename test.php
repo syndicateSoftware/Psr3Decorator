@@ -11,7 +11,6 @@ use Monolog\Logger;
 
 require_once(__DIR__ . "/vendor/autoload.php");
 require_once(__DIR__ . "/MyLogger.php");
-require_once(__DIR__ . "/AnotherLogger.php");
 
 $monolog = new Logger('PSR3DECORATOR');
 $handler = new StreamHandler(__DIR__ . '/sc.log', Logger::WARNING);
