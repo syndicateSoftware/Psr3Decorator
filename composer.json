@@ -1,0 +1,21 @@
+{
+  "name": "syndicate/psr3_decorator",
+  "description": "Decorate a PSR3 logger to add extra functionality",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Shannon Craven",
+      "email": "shannon@syndicatesoftware.net"
+    }
+  ],
+  "autoload":{
+    "psr-4": {
+      "Syndicate\\Psr3Decorator\\": "src/"
+    }
+  },
+  "require": {
+    "psr/log": "~1",
+    "monolog/monolog": "2.0.x-dev"
+  }
+}
