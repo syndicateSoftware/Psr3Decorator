@@ -7,6 +7,7 @@
  */
 
 namespace Syndicate\Psr3Decorator\Traits;
+use Closure;
 
 /**
  * Trait Psr3RedactableTrait
@@ -17,9 +18,84 @@ namespace Syndicate\Psr3Decorator\Traits;
  */
 trait Psr3RedactableTrait
 {
+    /** @var string[]  */
+    private $redaction_items = array();
 
+    /** @var Closure */
+    private $redaction_message_filter;
+
+    /** @var Closure */
+    private $redaction_context_filter;
+
+    /** @var bool  */
+    private $filters_registered = false;
+
+    /**
+     *  Add a string to the array of redacted items
+     *
+     * Author: Shannon C
+     *
+     * @param $text
+     */
     public function redact($text)
     {
+        if (! in_array($text, $this->redaction_items)) {
+            $this->redaction_items[] = $text;
+        }
 
+        if ($this->filters_registered === false) {
+            // register filters with a priority of -999 so that they run (nearly) last
+            $this->addMessageFilter($this->getRedactionMessageFilter(), -999);
+            $this->addContextFilter($this->getRedactionContextFilter(), -999);
+            $this->filters_registered = true;
+        }
+
+        return $this;
     } // end function redact
+
+    /**
+     *  Return the filter used to redact messages
+     *
+     * Author: Shannon C
+     *
+     * @return Closure
+     */
+    private function getRedactionMessageFilter()
+    {
+        if (is_null($this->redaction_message_filter)) {
+            $this->redaction_message_filter = function($message) {
+                echo "running redaction message fiter\n";
+                echo "submitted message: $message \n";
+
+                $ret = str_replace($this->redaction_items, "*** REDACTED ***", $message);
+
+                echo "ret = $ret \n";
+                return $ret;
+            };
+        }
+
+        return $this->redaction_message_filter;
+    } // end function getRedactionMessageFilter
+
+    /**
+     *  Return the filter used to redact context array
+     *
+     * Author: Shannon C
+     *
+     * @return Closure
+     */
+    private function getRedactionContextFilter()
+    {
+        if (is_null($this->redaction_context_filter)) {
+            $this->redaction_context_filter = function($context) {
+                $json = json_encode($context);
+                $redacted = str_replace($this->redaction_items, "*** REDACTED ***", $json);
+                $arr = json_decode($redacted, true);
+
+                return $arr;
+            };
+        }
+
+        return $this->redaction_context_filter;
+    } // end function getRedactionContextFilter
 } // end trait Psr3RedactableTrait

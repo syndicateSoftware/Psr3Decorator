@@ -13,18 +13,26 @@ require_once(__DIR__ . "/vendor/autoload.php");
 require_once(__DIR__ . "/MyLogger.php");
 
 $monolog = new Logger('PSR3DECORATOR');
-$handler = new StreamHandler(__DIR__ . '/sc.log', Logger::WARNING);
+$handler = new StreamHandler("php://stdout", Logger::WARNING);
 
 $monolog->pushHandler($handler);
 
 
 $logger = new MyLogger($monolog);
-$logger->warning("Before tag");
+$logger->redact("ARC");
+$logger->redact("tag");
+$logger->warning("Before tag", array("submitted" => "first"));
 $logger->addMessageTag("Marco");
 $logger->addMessageTag("Polo");
-$logger->warning("After tag");
+$logger->addContextTag("authenticated_user_id", 1234);
+$logger->addContextTag("endpoint", "first");
+$logger->warning("After tags");
 $logger->removeMessageTag("Marco");
-$logger->warning("After removing");
+$logger->removeContextTagKey("ENDPOINT");
+$logger->warning("After removing first tag(s)");
+$logger->removeMessageTag("polo");
+$logger->removeContextTagKey("AUTHENticated_User_ID");
+$logger->warning("After removing all tags");
 
 $logger->redact("abc");
 

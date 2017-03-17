@@ -7,6 +7,7 @@
  */
 
 namespace Syndicate\Psr3Decorator\Traits;
+use Closure;
 use Syndicate\Psr3Decorator\Psr3Decorator;
 
 
@@ -25,10 +26,22 @@ trait Psr3TaggableTrait
     /** @var string[] */
     private $context_tags = array();
 
+    /** @var string[] */
+    private $context_tag_keys = array();
+
     /** @var bool */
     private $message_filter_registered = false;
 
+    /** @var Closure */
+    private $message_filter;
 
+    /** @var bool  */
+    private $context_filter_registered = false;
+
+    /** @var Closure */
+    private $context_filter;
+
+    //<editor-fold desc="Message Tags">
     /**
      *  Adds a tag to every log message processed
      *
@@ -39,7 +52,7 @@ trait Psr3TaggableTrait
     public function addMessageTag($tag)
     {
         if (! $this instanceof Psr3Decorator) {
-            return ;
+            return $this;
         }
 
         $tag = strtoupper($tag);
@@ -48,12 +61,12 @@ trait Psr3TaggableTrait
             $this->message_tags[] = (string) $tag;
         }
 
-        if ($this->message_filter_registered) {
-            return;
+        if ($this->message_filter_registered == false) {
+            $this->addMessageFilter($this->getMessageFilterClosure());
+            $this->message_filter_registered = true;
         }
 
-        $this->addMessageFilter("TAGGABLE", array($this, "filterMessage"));
-        $this->message_filter_registered = true;
+        return $this;
     } // end function addMessageTag
 
 
@@ -74,32 +87,146 @@ trait Psr3TaggableTrait
         }
 
         if (empty($this->message_tags)) {
-            $this->removeMessageFilter("TAGGABLE");
+            $this->removeMessageFilter($this->getMessageFilterClosure());
             $this->message_filter_registered = false;
         }
+
+        return $this;
     } // end function removeMessageTag
 
+
     /**
-     *  Callable that actually adds registered tags to log messages
+     *  Return array of registered message tags
      *
      * Author: Shannon C
      *
-     * @param $msg
-     *
-     * @return string
+     * @return \string[]
      */
-    protected function filterMessage($msg)
+    public function getMessageTags()
     {
-        $tags = array_values($this->message_tags);
-        $tags = json_encode($tags);
-        $tags = str_replace('"','', $tags);
-        $tags = "(TAGS:$tags) ";
-        return $tags . $msg;
-    } // end function filterMessage
+        return $this->message_tags;
+    } // end function getMessageTags
 
+
+    /**
+     *  Remove all registered message tags
+     *
+     * Author: Shannon C
+     *
+     */
+    public function clearMessageTags()
+    {
+        $this->message_tags = array();
+
+        return $this;
+    } // end function clearMessageTags
+
+    /**
+     *  Generate the message filter closure which will add all registered tags to the message string
+     *
+     * Author: Shannon C
+     *
+     * @return Closure
+     */
+    private function getMessageFilterClosure()
+    {
+        if (is_null($this->message_filter)) {
+            $this->message_filter = function($message, array $context){
+                $tags = array_values($this->message_tags);
+                $tags = json_encode($tags);
+                $tags = str_replace('"','', $tags);
+                $tags = "(TAGS:$tags) ";
+                return $tags . $message;
+            };
+        }
+
+        return $this->message_filter;
+    } // end function getMessageFilterClosure
+
+    //</editor-fold>
+
+    //<editor-fold desc="Context Tags">
+
+    /**
+     *  Adds a key/value pair to all contexts that are logged
+     *
+     * Author: Shannon C
+     *
+     * @param $tag_key
+     * @param $tag_value
+     */
     public function addContextTag($tag_key, $tag_value)
     {
+        if (! $this instanceof Psr3Decorator) {
+            return $this;
+        }
 
+        $tag_key_upper = strtoupper($tag_key);
+
+        if (array_key_exists($tag_key_upper, $this->context_tag_keys)) {
+            return $this;
+        }
+
+        $this->context_tag_keys[$tag_key_upper] = $tag_key;
+        $this->context_tags[$tag_key] = $tag_value;
+
+        if ($this->context_filter_registered == false) {
+            // add filter with priority of 100, so that it's run
+            // relatively early
+            $this->addContextFilter($this->getContextFilterClosure(), 100);
+            $this->context_filter_registered = true;
+        }
+
+        return $this;
     } // end function addContextTag
+
+    /**
+     *  Remove a registered context key/value pair by key
+     *
+     * Author: Shannon C
+     *
+     * @param $tag_key
+     */
+    public function removeContextTagKey($tag_key)
+    {
+        $tag_key_upper = strtoupper($tag_key);
+
+        if (array_key_exists($tag_key_upper, $this->context_tag_keys) === false) {
+            return $this;
+        }
+
+        $tag_key = $this->context_tag_keys[$tag_key_upper];
+
+        if (array_key_exists($tag_key, $this->context_tags)) {
+            unset($this->context_tags[$tag_key]);
+        }
+
+        if (empty($this->context_tags)) {
+            $this->removeContextFilter($this->getContextFilterClosure());
+            $this->context_filter_registered = false;
+        }
+
+        return $this;
+    } // end function removeContextTagKey
+
+    /**
+     *  Return the context filter method that combines registered tags with submitted context
+     *  When duplicate keys are present in both arrays, the submitted context should be preserved
+     *
+     * Author: Shannon C
+     *
+     * @return Closure
+     */
+    private function getContextFilterClosure()
+    {
+        if (is_null($this->context_filter)) {
+            $this->context_filter = function(array $context){
+                return array_merge($this->context_tags, $context);
+            };
+        }
+
+        return $this->context_filter;
+    } // end function getContextFilterClosure
+    //</editor-fold>
 
 } // end trait Psr3TaggableTrait
