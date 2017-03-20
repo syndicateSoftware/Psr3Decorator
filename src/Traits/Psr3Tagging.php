@@ -12,13 +12,13 @@ use Syndicate\Psr3Decorator\Psr3Decorator;
 
 
 /**
- * Trait Psr3TaggableTrait
+ * Trait Psr3Tagging
  * Author: Shannon C
  * Born: 2017-02-21
  *
  * @package Syndicate\DecoratedPsr3\Traits
  */
-trait Psr3TaggableTrait
+trait Psr3Tagging
 {
     /** @var string[] */
     private $message_tags = array();
@@ -48,6 +48,7 @@ trait Psr3TaggableTrait
      * Author: Shannon C
      *
      * @param $tag
+     * @return $this
      */
     public function addMessageTag($tag)
     {
@@ -76,6 +77,7 @@ trait Psr3TaggableTrait
      * Author: Shannon C
      *
      * @param $tag
+     * @return $this
      */
     public function removeMessageTag($tag)
     {
@@ -186,6 +188,7 @@ trait Psr3TaggableTrait
      * Author: Shannon C
      *
      * @param $tag_key
+     * @return $this
      */
     public function removeContextTagKey($tag_key)
     {
@@ -210,6 +213,27 @@ trait Psr3TaggableTrait
     } // end function removeContextTagKey
 
     /**
+     *  Get all registered context tags
+     *
+     * Author: Shannon C
+     *
+     * @return \string[]
+     */
+    public function getContextTags()
+    {
+        return $this->context_tags;
+    } // end function getContextTags
+    /**
+     *  Remove all registered context tags
+     *
+     * Author: Shannon C
+     *
+     */
+    public function clearContextTags()
+    {
+        $this->context_tags = array();
+    } // end function clearContextTags
+    /**
      *  Return the context filter method that combines registered tags with submitted context
      *  When duplicate keys are present in both arrays, the submitted context should be preserved
      *
@@ -229,4 +253,4 @@ trait Psr3TaggableTrait
     } // end function getContextFilterClosure
     //</editor-fold>
 
-} // end trait Psr3TaggableTrait
+} // end trait Psr3Tagging

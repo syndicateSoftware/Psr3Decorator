@@ -10,13 +10,13 @@ namespace Syndicate\Psr3Decorator\Traits;
 use Closure;
 
 /**
- * Trait Psr3RedactableTrait
+ * Trait Psr3Redaction
  * Author: Shannon C
  * Born: 2017-02-21
  *
  * @package Syndicate\DecoratedPsr3\Traits
  */
-trait Psr3RedactableTrait
+trait Psr3Redaction
 {
     /** @var string[]  */
     private $redaction_items = array();
@@ -36,6 +36,7 @@ trait Psr3RedactableTrait
      * Author: Shannon C
      *
      * @param $text
+     * @return $this
      */
     public function redact($text)
     {
@@ -44,9 +45,9 @@ trait Psr3RedactableTrait
         }
 
         if ($this->filters_registered === false) {
-            // register filters with a priority of -999 so that they run (nearly) last
-            $this->addMessageFilter($this->getRedactionMessageFilter(), -999);
-            $this->addContextFilter($this->getRedactionContextFilter(), -999);
+            // register filters with a priority of -999 so that they run very early
+            $this->addMessageFilter($this->getRedactionMessageFilter(), 999);
+            $this->addContextFilter($this->getRedactionContextFilter(), 999);
             $this->filters_registered = true;
         }
 
@@ -64,13 +65,8 @@ trait Psr3RedactableTrait
     {
         if (is_null($this->redaction_message_filter)) {
             $this->redaction_message_filter = function($message) {
-                echo "running redaction message fiter\n";
-                echo "submitted message: $message \n";
-
-                $ret = str_replace($this->redaction_items, "*** REDACTED ***", $message);
-
-                echo "ret = $ret \n";
-                return $ret;
+                echo "redaction filter running \n";
+                return str_replace($this->redaction_items, "*** REDACTED ***", $message);
             };
         }
 
@@ -98,4 +94,4 @@ trait Psr3RedactableTrait
 
         return $this->redaction_context_filter;
     } // end function getRedactionContextFilter
-} // end trait Psr3RedactableTrait
+} // end trait Psr3Redaction

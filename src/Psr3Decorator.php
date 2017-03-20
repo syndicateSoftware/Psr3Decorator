@@ -18,7 +18,7 @@ use SplObjectStorage;
  *
  * @package Syndicate\DecoratedPsr3
  */
-class Psr3Decorator implements LoggerInterface
+abstract class Psr3Decorator implements LoggerInterface
 {
     /** @var  LoggerInterface */
     private $logger;
@@ -46,7 +46,7 @@ class Psr3Decorator implements LoggerInterface
 
     /**
      * An over-writable function that will be called from the constructor, since
-     * it is defined as final.  You can use this to do any initialization work, like
+     * the constructor is final.  You can use this to do any initialization work, like
      * adding custom filters without importing them as traits
      *
      * Author: Shannon C
@@ -56,6 +56,18 @@ class Psr3Decorator implements LoggerInterface
     {
 
     } // end function init
+
+    /**
+     *
+     *
+     * Author: Shannon C
+     *
+     * @return LoggerInterface
+     */
+    public function getPsr3Implementation()
+    {
+        return $this->logger;
+    } // end function getPsr3Implementation
 
     //<editor-fold desc="Psr3 Methods">
     /**
@@ -225,7 +237,7 @@ class Psr3Decorator implements LoggerInterface
      *
      * @return mixed
      */
-    private function applyMessageFilters($message, $context)
+    protected function applyMessageFilters($message, $context)
     {
         foreach ($this->message_filters as $filter) {
             $message = $filter($message, $context);
@@ -240,7 +252,7 @@ class Psr3Decorator implements LoggerInterface
      *
      * Author: Shannon C
      *
-     * @param callable $filter
+     * @param Closure $filter
      */
     protected function addMessageFilter(Closure $filter, $priority = null)
     {
@@ -252,6 +264,7 @@ class Psr3Decorator implements LoggerInterface
                 $priority
             );
         }
+
     } // end function addMessageFilter
 
     /**
@@ -259,7 +272,7 @@ class Psr3Decorator implements LoggerInterface
      *
      * Author: Shannon C
      *
-     * @param callable $filter
+     * @param Closure $filter
      */
     protected function removeMessageFilter(Closure $filter)
     {
@@ -281,7 +294,7 @@ class Psr3Decorator implements LoggerInterface
      *
      * @return mixed
      */
-    private function applyContextFilters($message, $context)
+    protected function applyContextFilters($message, $context)
     {
         foreach ($this->context_filters as $filter) {
             $context = $filter($context, $message);
@@ -333,8 +346,8 @@ class Psr3Decorator implements LoggerInterface
      * Author: Shannon C
      *
      * @param SplObjectStorage $s
-     * @param Closure          $filter
-     * @param                  $priority
+     * @param Closure          $submitted_filter
+     * @param                  $submitted_priority
      *
      * @return SplObjectStorage
      */
