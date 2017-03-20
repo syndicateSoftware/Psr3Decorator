@@ -15,7 +15,6 @@
     }
   },
   "require": {
-    "psr/log": "~1",
-    "monolog/monolog": "2.0.x-dev"
+    "psr/log": "~1"
   }
 }
