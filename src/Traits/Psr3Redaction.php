@@ -83,7 +83,7 @@ trait Psr3Redaction
     private function getRedactionContextFilter()
     {
         if (is_null($this->redaction_context_filter)) {
-            $this->redaction_context_filter = function($context) {
+            $this->redaction_context_filter = function($message, $context) {
                 $json = json_encode($context);
                 $redacted = str_replace($this->redaction_items, "*** REDACTED ***", $json);
                 $arr = json_decode($redacted, true);

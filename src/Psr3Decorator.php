@@ -297,7 +297,7 @@ abstract class Psr3Decorator implements LoggerInterface
     protected function applyContextFilters($message, $context)
     {
         foreach ($this->context_filters as $filter) {
-            $context = $filter($context, $message);
+            $context = $filter($message, $context);
         }
 
         return $context;

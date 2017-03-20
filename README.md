@@ -159,12 +159,42 @@ $this->removeMessageFilter($msg_filter1);
 $this->removeContextFilter($ctx_filter1);
 ```
 
-### The init method
+#### The init method
 The constructor method of Psr3Decorator is final, and cannot be over-ridden by your custom logging class.
 In order to provide some means of allowing your logger class to do any type of bootstrapping work, there is an
 ```init()``` method that is over-ridable, and will be called from the constructor.  An example of this can be seen 
 above in the Psr3MessageContextInterpolation section.
 
+#### Example
+```php
+class MyLogger extends Psr3Decorator
+{    
+    use \Syndicate\Psr3Decorator\Traits\Psr3Tagging;
+    use \Syndicate\Psr3Decorator\Traits\Psr3Redaction;
+    
+    public function init()
+    {
+        // change all messages to upper case
+        $this->addMessageFilter(function($message, $context){
+                    return strtoupper($message);
+                }, -900);
+        
+        // change all keys and values in context array
+        // to upper case
+        $this->addContextFilter(function($message, $context){
+            $filtered_context = array();
+            foreach ($context as $key => $value) {
+                $upper_key = strtoupper($key);
+                $upper_val = strtoupper($value);
+
+                $filtered_context[$upper_key] = $upper_val;
+            }
+
+            return $filtered_context;
+        }, -900);
+    } 
+} 
+```
 
 
 

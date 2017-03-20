@@ -139,7 +139,6 @@ trait Psr3Buffer
         if (is_null($this->buffer_filter)) {
             $this->buffer_filter = function($message, $context) {
                 $c = $this->applyContextFilters($message, $context);
-                echo "buffer filter running\n";
                 $m = $message . " " . json_encode($c);
                 foreach($this->active_buffers as $buffer_name) {
                     if (! array_key_exists($buffer_name, $this->buffers)) {

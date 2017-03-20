@@ -34,6 +34,22 @@ class MyLogger extends Psr3Decorator
     public function init()
     {
         $this->setMessageInterpolation(true);
+
+        $this->addMessageFilter(function($message, $context){
+            return strtoupper($message);
+        }, -900);
+
+        $this->addContextFilter(function($message, $context){
+            $filtered_context = array();
+            foreach ($context as $key => $value) {
+                $upper_key = strtoupper($key);
+                $upper_val = strtoupper($value);
+
+                $filtered_context[$upper_key] = $upper_val;
+            }
+
+            return $filtered_context;
+        }, -900);
     } // end function init
 } // end class MyLogger
 

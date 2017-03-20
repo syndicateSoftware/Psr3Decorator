@@ -244,7 +244,7 @@ trait Psr3Tagging
     private function getContextFilterClosure()
     {
         if (is_null($this->context_filter)) {
-            $this->context_filter = function(array $context){
+            $this->context_filter = function($message, array $context){
                 return array_merge($this->context_tags, $context);
             };
         }
