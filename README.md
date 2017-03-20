@@ -36,7 +36,7 @@ The tagging trait allows you to add/remove tags for all messsages or contexts pa
 
 Message tags will be converted to uppercase and added to the beginning of each message as a JSON encoded array:
 
-```
+```php
 $logger->addMessageTag("Tag1");
 $logger->addMessageTag("AnotherTag");
 $logger->warning("Something is wrong");
@@ -46,7 +46,7 @@ $logger->warning("Something is wrong");
 ```
 
 You can also add context tags, which will be added to each context passed to the logger:
-```
+```php
 $logger->addContextTag("user_id", 418);
 $logger->info("User logged in");
 $logger->info("User logged out");
@@ -59,7 +59,7 @@ $logger->info("User logged out");
 #### Psr3Redaction
 The redaction trait allows you to watch for sensitive information, and remove it from anything sent to the logger.
 
-```
+```php
 $user = array(
     "id"        =>  418,
     "password   =>  "super_secret"
@@ -79,7 +79,7 @@ $logger->info("Password is " . $user['password']);
 #### Psr3Buffer
 The buffer trait allows you to start/stop buffers to capture everything sent to the logger.
 
-```
+```php
 $logger->startBuffer("user_actions");
 
 $logger->info("User did this");
@@ -96,7 +96,7 @@ $actions = $logger->getBuffer("user_actions");
 #### Psr3MessageContextInterpolation
 This trait adds functionality for interpolating data from the context array into the message.
 
-```
+```php
 $user = array(
     "id"    =>  418,
     "name"  =>  "shannon"
@@ -111,7 +111,7 @@ $this->info("User {name} has logged out", $user);
 In order to use this interpolation function, you will need to add an additional step after importing the trait.
 You'll need to over-ride the ```init()``` method in your logging class and enable message interpolation:
 
-``` 
+```php
 class MyLogger extends Psr3Decorator
 {
     use \Syndicate\Psr3Decorator\Traits\Psr3MessageContextInterpolation;
@@ -150,7 +150,7 @@ $this->addMessageFilter($filter5);          // will run fourth
 ```
 
 You can also remove filters at any time by passing the filter to the appropriate remove method:
-```
+```php
 $this->addMessageFilter($msg_filter1);
 $this->addMessageFilter($msg_filter2);
 $this->addContextFilter($ctx_filter1);
